@@ -154,6 +154,7 @@ var ChannelClientRetryableCodes = map[status.Group][]status.Code{
 	// gRPC fail fast option, once available
 	status.GRPCTransportStatus: {
 		status.Code(grpcCodes.Unavailable),
+		status.Code(grpcCodes.DeadlineExceeded),
 	},
 }
 
