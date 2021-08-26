@@ -17,12 +17,12 @@ SPDX-License-Identifier: Apache-2.0
 package gateway
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"time"
 
 	fabricCaUtil "github.com/hyperledger/fabric-sdk-go/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/util"
-	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/context"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/core"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
@@ -37,8 +37,6 @@ const (
 	defaultTimeout      = 5 * time.Minute
 	localhostEnvVarName = "DISCOVERY_AS_LOCALHOST"
 )
-
-var logger = logging.NewLogger("fabsdk/msp")
 
 // Gateway is the entry point to a Fabric network
 type Gateway struct {
@@ -309,7 +307,7 @@ func createGatewayConfig(backend core.ConfigBackend, org string) *gatewayConfig 
 	var channelConfig map[string]map[string]map[string]map[string]bool
 	_, exists := backend.Lookup("channels")
 	if !exists {
-		logger.Warnf("creating default channel config because config does not have channels key")
+		fmt.Printf("creating default channel config because config does not have channels key\n")
 		channelConfig = createDefaultChannelConfig(backend, org)
 	}
 
@@ -363,7 +361,7 @@ channels:
 		eventSource: true
 */
 func createDefaultChannelConfig(backend core.ConfigBackend, org string) map[string]map[string]map[string]map[string]bool {
-	logger.Warnf("create default channel config for org %s", org)
+	fmt.Printf("create default channel config for org %s\n", org)
 	channels := make(map[string]map[string]map[string]map[string]bool)
 	_default := make(map[string]map[string]map[string]bool)
 	gateways := make(map[string]map[string]bool)
@@ -379,7 +377,7 @@ func createDefaultChannelConfig(backend core.ConfigBackend, org string) map[stri
 	}
 	arr := value.([]interface{})
 	for _, gatewayPeer := range arr {
-		logger.Warnf("assigning roles for peer %s", gatewayPeer.(string))
+		fmt.Printf("assigning roles for peer %s\n", gatewayPeer.(string))
 		gateways[gatewayPeer.(string)] = roles
 	}
 
