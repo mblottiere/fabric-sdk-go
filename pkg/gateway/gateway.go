@@ -22,6 +22,7 @@ import (
 	"time"
 
 	fabricCaUtil "github.com/hyperledger/fabric-sdk-go/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/util"
+	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/context"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/core"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
@@ -36,6 +37,8 @@ const (
 	defaultTimeout      = 5 * time.Minute
 	localhostEnvVarName = "DISCOVERY_AS_LOCALHOST"
 )
+
+var logger = logging.NewLogger("fabsdk/msp")
 
 // Gateway is the entry point to a Fabric network
 type Gateway struct {
@@ -306,6 +309,7 @@ func createGatewayConfig(backend core.ConfigBackend, org string) *gatewayConfig 
 	var channelConfig map[string]map[string]map[string]map[string]bool
 	_, exists := backend.Lookup("channels")
 	if !exists {
+		logger.Warnf("creating default channel config because config does not have channels key")
 		channelConfig = createDefaultChannelConfig(backend, org)
 	}
 
@@ -320,15 +324,15 @@ func createGatewayConfig(backend core.ConfigBackend, org string) *gatewayConfig 
 
 entityMatchers:
   peer:
-    - pattern: ([^:]+):(\\d+)
-      urlSubstitutionExp: localhost:${2}
-      sslTargetOverrideUrlSubstitutionExp: ${1}
-      mappedHost: ${1}
+	- pattern: ([^:]+):(\\d+)
+	  urlSubstitutionExp: localhost:${2}
+	  sslTargetOverrideUrlSubstitutionExp: ${1}
+	  mappedHost: ${1}
   orderer:
-    - pattern: ([^:]+):(\\d+)
-      urlSubstitutionExp: localhost:${2}
-      sslTargetOverrideUrlSubstitutionExp: ${1}
-      mappedHost: ${1}
+	- pattern: ([^:]+):(\\d+)
+	  urlSubstitutionExp: localhost:${2}
+	  sslTargetOverrideUrlSubstitutionExp: ${1}
+	  mappedHost: ${1}
 */
 func createLocalhostMappings() map[string][]map[string]string {
 	matchers := make(map[string][]map[string]string)
@@ -351,14 +355,15 @@ func createLocalhostMappings() map[string][]map[string]string {
 
 channels:
   _default:
-    peers:
-      <gateway_peer_name>:
-        endorsingPeer: true
-        chaincodeQuery: true
-        ledgerQuery: true
-        eventSource: true
+	peers:
+	  <gateway_peer_name>:
+		endorsingPeer: true
+		chaincodeQuery: true
+		ledgerQuery: true
+		eventSource: true
 */
 func createDefaultChannelConfig(backend core.ConfigBackend, org string) map[string]map[string]map[string]map[string]bool {
+	logger.Warnf("create default channel config for org %s", org)
 	channels := make(map[string]map[string]map[string]map[string]bool)
 	_default := make(map[string]map[string]map[string]bool)
 	gateways := make(map[string]map[string]bool)
@@ -374,6 +379,7 @@ func createDefaultChannelConfig(backend core.ConfigBackend, org string) map[stri
 	}
 	arr := value.([]interface{})
 	for _, gatewayPeer := range arr {
+		logger.Warnf("assigning roles for peer %s", gatewayPeer.(string))
 		gateways[gatewayPeer.(string)] = roles
 	}
 
