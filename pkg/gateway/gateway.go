@@ -22,6 +22,7 @@ import (
 	"time"
 
 	fabricCaUtil "github.com/hyperledger/fabric-sdk-go/internal/github.com/hyperledger/fabric-ca/sdkinternal/pkg/util"
+	"github.com/hyperledger/fabric-sdk-go/pkg/client/event"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/context"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/core"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
@@ -244,6 +245,9 @@ func WithTimeout(timeout time.Duration) Option {
 }
 
 // WithBlockNum optionaly indicates the block number from which events are to be received.
+//
+// Deprecated: WithBlockNum was created to pass the option to the event client
+// when instanciating a Network. You can now pass the option to gateway.GetNetwork directly.
 func WithBlockNum(from uint64) Option {
 	return func(gw *Gateway) error {
 		gw.options.FromBlock = from
@@ -258,9 +262,9 @@ func WithBlockNum(from uint64) Option {
 //
 //  Returns:
 //  A Network object representing the channel
-func (gw *Gateway) GetNetwork(name string) (*Network, error) {
+func (gw *Gateway) GetNetwork(name string, options ...event.ClientOption) (*Network, error) {
 	channelProvider := gw.GetChannelProvider(name)
-	return newNetwork(gw, channelProvider)
+	return newNetwork(gw, channelProvider, options...)
 }
 
 // GetChannelProvider returns a ChannelProvider function.

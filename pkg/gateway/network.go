@@ -24,7 +24,7 @@ type Network struct {
 	event   *event.Client
 }
 
-func newNetwork(gateway *Gateway, channelProvider context.ChannelProvider) (*Network, error) {
+func newNetwork(gateway *Gateway, channelProvider context.ChannelProvider, options ...event.ClientOption) (*Network, error) {
 	n := Network{
 		gateway: gateway,
 	}
@@ -45,6 +45,7 @@ func newNetwork(gateway *Gateway, channelProvider context.ChannelProvider) (*Net
 	n.name = ctx.ChannelID()
 
 	eventOpts := []event.ClientOption{event.WithBlockEvents()}
+	eventOpts = append(eventOpts, options...)
 	if gateway.options.FromBlockSet {
 		eventOpts = append(eventOpts, event.WithSeekType(seek.FromBlock), event.WithBlockNum(gateway.options.FromBlock))
 	}
